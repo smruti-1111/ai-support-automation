@@ -1,8 +1,11 @@
 from sqlalchemy.orm import Session
 from database.models import Ticket
+from utils.mask import mask_sensitive_data   # ✅ NEW IMPORT
 
 def create_ticket(db: Session, user_query: str):
-    ticket = Ticket(user_query=user_query)
+    masked_query = mask_sensitive_data(user_query)   # ✅ NEW LINE
+
+    ticket = Ticket(user_query=masked_query)         # ✅ MODIFIED
     db.add(ticket)
     db.commit()
     db.refresh(ticket)
