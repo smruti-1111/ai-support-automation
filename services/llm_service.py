@@ -3,35 +3,29 @@ import httpx
 from openai import OpenAI
 import json
 
-# Force proper SSL verification using certifi
-http_client = httpx.Client(verify=certifi.where())
-
-
 client = OpenAI(
-    http_client=httpx.Client(
-        verify=certifi.where(),
-        trust_env=True   # ← IMPORTANT
-    )
+    http_client=httpx.Client(verify=certifi.where(), trust_env=True)
 )
-
 
 def analyze_text(text: str):
     prompt = f"""
-    Analyze the following user query and respond ONLY in JSON format:
+    Analyze the user query and return JSON:
 
     {{
         "sentiment": "positive | negative | neutral",
-        "summary": "short one-line summary"
+        "summary": "short summary",
+        "category": "billing | technical | general",
+        "priority": "low | medium | high"
     }}
 
-    Query: {text}
+    Rules:
+    - Frustration → high priority
+    - Crashes/errors → technical
     """
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",   # safer model
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": text + "\n" + prompt}],
     )
 
     output = response.choices[0].message.content
@@ -41,5 +35,27 @@ def analyze_text(text: str):
     except:
         return {
             "sentiment": "unknown",
-            "summary": output
+            "summary": output,
+            "category": "general",
+            "priority": "low"
         }
+
+
+def generate_response(text: str, sentiment: str):
+    prompt = f"""
+    You are a professional support assistant.
+
+    Generate a helpful reply.
+
+    Sentiment: {sentiment}
+    Query: {text}
+
+    Keep it short and polite.
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    return response.choices[0].message.content

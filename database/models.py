@@ -8,4 +8,6 @@ class Ticket(Base):
     user_query = Column(Text)
     sentiment = Column(String, default="neutral")
     summary = Column(Text, nullable=True)
-    
+    category = Column(String)
+    priority = Column(String)
+    response = Column(String)

@@ -20,4 +20,4 @@ def create_new_ticket(ticket: TicketCreate, db: Session = Depends(get_db)):
 @router.get("/tickets")
 def fetch_tickets(db: Session = Depends(get_db)):
     return get_all_tickets(db)
-
+    
